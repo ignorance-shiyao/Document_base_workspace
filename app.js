@@ -88,8 +88,23 @@ function toggleSidebar() {
 function updateUI() {
     const container = document.getElementById('tree-content');
     const start = (currentPage - 1) * CONFIG.pageSize;
-    container.innerHTML = filteredTree.slice(start, start + CONFIG.pageSize).map(([name, node]) => renderNode(name, node)).join('');
-    document.getElementById('pageInfo').innerText = `${currentPage} / ${Math.ceil(filteredTree.length / CONFIG.pageSize) || 1}`;
+    const totalPages = Math.ceil(filteredTree.length / CONFIG.pageSize) || 1;
+
+    // 渲染列表
+    container.innerHTML = filteredTree
+        .slice(start, start + CONFIG.pageSize)
+        .map(([name, node]) => renderNode(name, node))
+        .join('');
+
+    // 更新页码显示
+    document.getElementById('pageInfo').innerText = `${currentPage} / ${totalPages}`;
+
+    // 更新按钮状态：根据当前页码自动禁用/开启
+    const prevBtn = document.querySelector('.page-btn[onclick*="-1"]');
+    const nextBtn = document.querySelector('.page-btn[onclick*="1"]');
+
+    if (prevBtn) prevBtn.disabled = (currentPage === 1);
+    if (nextBtn) nextBtn.disabled = (currentPage === totalPages);
 }
 
 function changePage(s) {

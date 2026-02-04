@@ -50,7 +50,58 @@ body, html { margin: 0; padding: 0; height: 100%; font-family: -apple-system, sy
 .file-item:hover, .folder-header:hover { background: var(--side-item-hover); color: #fff; }
 .file-item.active { background: var(--accent-color); color: #fff; }
 
-.aside-footer { padding: 12px; background: rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+/* --- 侧边栏底部分页重塑 --- */
+.aside-footer {
+    padding: 16px;
+    background: rgba(0, 0, 0, 0.15); /* 深色半透明背景，增加层级感 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.page-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+    color: var(--side-text);
+    width: 32px;
+    height: 32px;
+    border-radius: 6px; /* 微圆角设计 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 12px;
+}
+
+.page-btn:hover:not(:disabled) {
+    background: var(--accent-color);
+    color: #ffffff;
+    border-color: var(--accent-color);
+    transform: translateY(-1px); /* 向上微漂浮感 */
+    box-shadow: 0 4px 12px rgba(49, 130, 206, 0.3);
+}
+
+.page-btn:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.page-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    filter: grayscale(1);
+}
+
+.page-info {
+    font-size: 12px;
+    color: var(--side-text);
+    min-width: 45px;
+    text-align: center;
+    font-family: "Monaco", monospace; /* 等宽字体让页码跳动更小 */
+    opacity: 0.8;
+}
 
 /* --- 内容区 --- */
 .el-main { flex: 1; display: flex; flex-direction: column; padding: 15px; transition: 0.3s; }
