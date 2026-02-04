@@ -3,163 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>项目空间 - 目录树</title>
-    <style>
-        :root { --primary: #1989fa; --bg: #f7f8fa; --text: #323233; --border: #ebedf0; }
-        body { background-color: var(--bg); font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 16px; color: var(--text); line-height: 1.5; }
-        header { margin-bottom: 20px; }
-        h1 { font-size: 20px; margin: 0; color: #1a1a1a; }
-
-        /* 树形结构样式 */
-        .tree-container { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .tree-node { border-bottom: 1px solid var(--border); }
-        .folder-header {
-            padding: 14px 16px; display: flex; align-items: center; cursor: pointer;
-            font-weight: 500; background: #fafafa; user-select: none;
-        }
-        .folder-header:active { background: #f2f3f5; }
-        .folder-icon { margin-right: 8px; transition: transform 0.2s; color: #ffca28; }
-        .folder-node.open > .folder-header .folder-icon { transform: rotate(90deg); }
-
-        .children { display: none; padding-left: 12px; background: #fff; }
-        .folder-node.open > .children { display: block; }
-
-        .file-item {
-            padding: 12px 16px 12px 32px; display: flex; align-items: center;
-            text-decoration: none; color: var(--text); border-bottom: 1px solid var(--border);
-            font-size: 14px;
-        }
-        .file-item:last-child { border-bottom: none; }
-        .file-item:active { background: #f2f3f5; }
-        .file-icon { margin-right: 10px; color: var(--primary); font-style: normal; }
-
-        /* 分页样式 */
-        .pagination { display: flex; justify-content: center; align-items: center; margin-top: 20px; gap: 15px; }
-        .btn {
-            padding: 6px 16px; border-radius: 4px; border: 1px solid var(--border);
-            background: #fff; cursor: pointer; font-size: 14px;
-        }
-        .btn:disabled { color: #ccc; cursor: not-allowed; }
-        .page-info { font-size: 14px; color: var(--sub); }
-
-        .loading { text-align: center; padding: 40px; color: #969799; }
-    </style>
+    <title>项目空间 | 智能索引</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
 </head>
 <body>
-
-<header>
-    <h1>项目空间</h1>
-    <p style="font-size: 12px; color: #969799;">自动构建层级目录索引</p>
-</header>
-
-<div id="app">
-    <div id="tree-content" class="tree-container">
-        <div class="loading">解析文件树中...</div>
-    </div>
-    <div class="pagination">
-        <button id="prevBtn" class="btn" onclick="changePage(-1)">上一页</button>
-        <span id="pageInfo" class="page-info">1 / 1</span>
-        <button id="nextBtn" class="btn" onclick="changePage(1)">下一页</button>
-    </div>
-</div>
-
-<script>
-    const CONFIG = {
-        user: 'ignorance-shiyao',
-        repo: 'ignorance',
-        branch: 'main',
-        pageSize: 10 // 每页展示的一级条目数量
-    };
-
-    let fullTree = [];
-    let currentPage = 1;
-
-    // 1. 获取并处理数据
-    async function init() {
-        try {
-            const url = `https://api.github.com/repos/${CONFIG.user}/${CONFIG.repo}/git/trees/${CONFIG.branch}?recursive=1`;
-            const response = await fetch(url);
-            const data = await response.json();
-
-            // 过滤 HTML
-            const htmlFiles = data.tree.filter(item =>
-                item.type === 'blob' && item.path.endsWith('.html') && item.path !== 'index.html'
-            );
-
-            // 构建树形结构
-            fullTree = buildTree(htmlFiles);
-            render();
-        } catch (err) {
-            document.getElementById('tree-content').innerHTML = '<div style="padding:20px;color:red;">加载失败，请检查网络或API限制</div>';
-        }
-    }
-
-    function buildTree(files) {
-        const root = {};
-        files.forEach(file => {
-            const parts = file.path.split('/');
-            let current = root;
-            parts.forEach((part, index) => {
-                if (!current[part]) {
-                    current[part] = index === parts.length - 1 ? { _file: file } : {};
-                }
-                current = current[part];
-            });
-        });
-        return Object.entries(root);
-    }
-
-    // 2. 渲染逻辑
-    function render() {
-        const container = document.getElementById('tree-content');
-        const start = (currentPage - 1) * CONFIG.pageSize;
-        const end = start + CONFIG.pageSize;
-        const pageItems = fullTree.slice(start, end);
-
-        container.innerHTML = pageItems.map(([name, node]) => renderNode(name, node)).join('');
-
-        // 更新分页状态
-        const totalPages = Math.ceil(fullTree.length / CONFIG.pageSize) || 1;
-        document.getElementById('pageInfo').innerText = `${currentPage} / ${totalPages}`;
-        document.getElementById('prevBtn').disabled = currentPage === 1;
-        document.getElementById('nextBtn').disabled = currentPage === totalPages;
-    }
-
-    function renderNode(name, node, path = '') {
-        const currentPath = path ? `${path}/${name}` : name;
-
-        // 如果是文件
-        if (node._file) {
-            return `
-                <a class="file-item" href="./${node._file.path}">
-                    <i class="file-icon">📄</i>
-                    <span>${name}</span>
-                </a>`;
-        }
-
-        // 如果是文件夹
-        const childHtml = Object.entries(node)
-            .map(([childName, childNode]) => renderNode(childName, childNode, currentPath))
-            .join('');
-
-        return `
-            <div class="folder-node">
-                <div class="folder-header" onclick="this.parentElement.classList.toggle('open')">
-                    <span class="folder-icon">▶</span>
-                    <span>${name}</span>
+    <div id="app">
+        <header class="glass-header">
+            <div class="header-content">
+                <h1>项目空间 <span>/ Index</span></h1>
+                <div class="search-wrapper">
+                    <input type="text" id="searchInput" placeholder="搜索文件名或路径 (支持模糊匹配)..." />
+                    <span class="search-icon">🔍</span>
                 </div>
-                <div class="children">${childHtml}</div>
-            </div>`;
-    }
+            </div>
+        </header>
 
-    function changePage(step) {
-        currentPage += step;
-        render();
-        window.scrollTo(0, 0);
-    }
+        <main>
+            <div id="tree-content" class="tree-container">
+                <div class="loading-shimmer">正在扫描代码仓库...</div>
+            </div>
 
-    init();
-</script>
-
+            <div class="pagination-bar">
+                <button id="prevBtn" class="action-btn" onclick="changePage(-1)">← 上一页</button>
+                <div id="pageDots" class="page-dots"></div>
+                <button id="nextBtn" class="action-btn" onclick="changePage(1)">下一页 →</button>
+            </div>
+        </main>
+    </div>
+    <script src="app.js"></script>
 </body>
 </html>
