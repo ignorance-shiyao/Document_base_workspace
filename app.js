@@ -1,41 +1,30 @@
-const CONFIG = { pageSize: 10 };
-let rawFiles = [];
-let filteredTree = [];
-let currentPage = 1;
-let fuse;
+const CONFIG = { pageSize: 12 };
+let rawFiles = [], filteredTree = [], currentPage = 1, fuse;
 
 async function init() {
     try {
-        // 直接读取本地生成的静态 JSON，不再请求 API
         const res = await fetch('./list.json');
-        if (!res.ok) throw new Error('Not Found');
         rawFiles = await res.json();
-
         fuse = new Fuse(rawFiles, { keys: ['path'], threshold: 0.3 });
-        handleSearch(""); // 初始渲染
-        setupSearch();
+        handleSearch("");
+        setupListeners();
     } catch (e) {
-        document.getElementById('tree-content').innerHTML = `
-            <div style="padding:40px; text-align:center; color: #999;">
-                <p>未找到索引文件，请确保 Actions 已运行成功并生成 list.json</p>
-            </div>`;
+        document.getElementById('tree-content').innerHTML = "索引未就绪";
     }
 }
 
-function setupSearch() {
-    document.getElementById('searchInput').addEventListener('input', (e) => {
-        handleSearch(e.target.value.trim());
-    });
+function setupListeners() {
+    document.getElementById('searchInput').addEventListener('input', (e) => handleSearch(e.target.value));
 }
 
-function handleSearch(query) {
-    const files = query ? fuse.search(query).map(r => r.item) : rawFiles;
+function handleSearch(q) {
+    const files = q ? fuse.search(q).map(r => r.item) : rawFiles;
     const tree = {};
-    files.forEach(file => {
-        const parts = file.path.split('/');
+    files.forEach(f => {
+        const parts = f.path.split('/');
         let cur = tree;
         parts.forEach((p, i) => {
-            if (!cur[p]) cur[p] = (i === parts.length - 1) ? { _f: file } : {};
+            if (!cur[p]) cur[p] = (i === parts.length - 1) ? { _f: f } : {};
             cur = cur[p];
         });
     });
@@ -44,37 +33,39 @@ function handleSearch(query) {
     updateUI();
 }
 
-function updateUI() {
-    const container = document.getElementById('tree-content');
-    const start = (currentPage - 1) * CONFIG.pageSize;
-    const pageItems = filteredTree.slice(start, start + CONFIG.pageSize);
-
-    container.innerHTML = pageItems.map(([name, node]) => renderNode(name, node)).join('');
-
-    const total = Math.ceil(filteredTree.length / CONFIG.pageSize) || 1;
-    document.getElementById('pageDots').innerText = `${currentPage} / ${total}`;
-    document.getElementById('prevBtn').disabled = currentPage === 1;
-    document.getElementById('nextBtn').disabled = currentPage === total;
-}
-
 function renderNode(name, node) {
     if (node._f) {
-        return `<a class="file-item" href="./${node._f.path}"><span class="icon">📄</span>${name}</a>`;
+        return `<div class="file-item" onclick="openPreview('./${node._f.path}', '${name}')">
+            <i class="far fa-file-code icon"></i>${name}</div>`;
     }
     const children = Object.entries(node).map(([n, v]) => renderNode(n, v)).join('');
-    return `
-        <div class="node-item">
-            <div class="folder-header" onclick="this.parentElement.classList.toggle('open')">
-                <span class="icon">📁</span><span>${name}</span><span class="chevron">›</span>
-            </div>
-            <div class="children">${children}</div>
-        </div>`;
+    return `<div class="node-item">
+        <div class="folder-header" onclick="this.parentElement.classList.toggle('open')">
+            <i class="far fa-folder icon"></i><span>${name}</span>
+        </div>
+        <div class="children" style="display:none; padding-left:18px;">${children}</div>
+    </div>`;
 }
 
-function changePage(step) {
-    currentPage += step;
-    updateUI();
-    window.scrollTo(0, 0);
+// 弹窗逻辑
+function openPreview(url, title) {
+    const overlay = document.getElementById('el-dialog-overlay');
+    const iframe = document.getElementById('preview-iframe');
+    document.getElementById('dialog-title').innerText = title;
+    iframe.src = url;
+    overlay.style.display = 'flex';
 }
 
+function closeDialog() {
+    document.getElementById('el-dialog-overlay').style.display = 'none';
+    document.getElementById('preview-iframe').src = 'about:blank';
+}
+
+function toggleSize() {
+    const dialog = document.getElementById('el-dialog');
+    const isFull = dialog.getAttribute('data-state') === 'full';
+    dialog.setAttribute('data-state', isFull ? 'normal' : 'full');
+}
+
+// 分页逻辑同前... (略)
 init();

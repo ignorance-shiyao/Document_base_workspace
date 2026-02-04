@@ -3,31 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>项目空间 | 极速版</title>
+    <title>项目支撑系统 | 索引工作台</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css">
 </head>
 <body>
-    <div id="app">
-        <header class="glass-header">
-            <div class="header-content">
-                <h1>项目空间 <span>/ Index</span></h1>
-                <div class="search-wrapper">
-                    <input type="text" id="searchInput" placeholder="搜索文件名或路径..." />
-                    <span class="search-icon">🔍</span>
-                </div>
+    <div id="app" class="el-container">
+        <aside class="el-aside">
+            <div class="brand">
+                <i class="fas fa-project-diagram"></i>
+                <span>项目资源库</span>
             </div>
-        </header>
-        <main>
-            <div id="tree-content" class="tree-container">
-                <div class="loading">正在加载索引...</div>
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="搜索资源...">
             </div>
-            <div class="pagination-bar">
-                <button id="prevBtn" class="action-btn" onclick="changePage(-1)">← 上一页</button>
-                <div id="pageDots" class="page-dots"></div>
-                <button id="nextBtn" class="action-btn" onclick="changePage(1)">下一页 →</button>
+            <nav id="tree-content" class="el-tree">
+                <div class="el-loading">扫描索引中...</div>
+            </nav>
+            <div class="pagination-mini">
+                <button onclick="changePage(-1)"><i class="fas fa-chevron-left"></i></button>
+                <span id="pageInfo">1 / 1</span>
+                <button onclick="changePage(1)"><i class="fas fa-chevron-right"></i></button>
+            </div>
+        </aside>
+
+        <main class="el-main">
+            <div class="welcome-screen">
+                <i class="fas fa-rocket"></i>
+                <p>请从左侧选择一个 HTML 页面进行预览</p>
             </div>
         </main>
+
+        <div id="el-dialog-overlay" class="el-overlay" style="display: none;">
+            <div id="el-dialog" class="el-dialog" data-state="normal">
+                <div class="el-dialog__header">
+                    <span id="dialog-title" class="el-dialog__title">页面预览</span>
+                    <div class="el-dialog__btns">
+                        <button onclick="toggleSize()" title="缩放"><i class="fas fa-expand-alt"></i></button>
+                        <button onclick="closeDialog()" class="close-btn" title="关闭"><i class="fas fa-times"></i></button>
+                    </div>
+                </div>
+                <div class="el-dialog__body">
+                    <iframe id="preview-iframe" src="about:blank"></iframe>
+                </div>
+            </div>
+        </div>
     </div>
     <script src="app.js"></script>
 </body>
