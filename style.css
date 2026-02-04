@@ -23,7 +23,7 @@
 body, html { margin: 0; padding: 0; height: 100%; font-family: -apple-system, system-ui, sans-serif; }
 .el-container { display: flex; height: 100vh; overflow: hidden; background: var(--main-bg); }
 
-/* --- 侧边栏逻辑 --- */
+/* --- 侧边栏及物理折叠 --- */
 .el-sidebar {
     width: 280px; background: var(--side-bg); display: flex; flex-direction: column;
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s;
@@ -51,12 +51,12 @@ body, html { margin: 0; padding: 0; height: 100%; font-family: -apple-system, sy
     display: flex; align-items: center; gap: 10px; font-size: 13px; margin-bottom: 2px;
 }
 .file-item:hover, .folder-header:hover { background: var(--side-hover); color: #fff; }
-.file-item.active { background: var(--accent); color: #fff; }
+.file-item.active { background: var(--accent); color: #fff; box-shadow: 0 4px 12px rgba(64,158,255,0.3); }
 
 .aside-footer { padding: 12px; background: rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; color: var(--side-text); font-size: 12px; }
 
-/* --- 内容预览区 --- */
-.el-main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+/* --- 内容预览区布局 --- */
+.el-main { flex: 1; display: flex; flex-direction: column; min-width: 0; transition: margin-left 0.3s; }
 
 .main-header {
     height: 56px; background: var(--card-bg); border-bottom: 1px solid var(--border);
@@ -70,10 +70,14 @@ body, html { margin: 0; padding: 0; height: 100%; font-family: -apple-system, sy
     background: #fff; box-shadow: 0 2px 12px rgba(0,0,0,0.05);
 }
 
-/* 按钮通用 */
-.icon-btn, .theme-btn, .page-btn { background: transparent; border: none; cursor: pointer; color: inherit; padding: 8px; border-radius: 4px; transition: 0.2s; }
-.theme-btn:hover, .icon-btn:hover { background: var(--side-hover); color: var(--accent); }
-[data-theme="light"] .theme-btn:hover { background: #eee; }
+/* 按钮样式交互 */
+.icon-btn-side { background: transparent; border: none; color: inherit; cursor: pointer; opacity: 0.6; transition: 0.2s; }
+.icon-btn-side:hover { opacity: 1; color: var(--accent); }
 
-.loader { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--accent); font-size: 24px; z-index: 10; }
+.icon-btn-main, .theme-btn, .page-btn { background: transparent; border: none; cursor: pointer; color: inherit; padding: 8px; border-radius: 4px; transition: 0.2s; }
+.theme-btn:hover, .icon-btn-main:hover { background: var(--side-hover); color: var(--accent); }
+[data-theme="light"] .theme-btn:hover, [data-theme="light"] .icon-btn-main:hover { background: #eee; }
+
+.loader { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--accent); font-size: 24px; z-index: 10; background: rgba(255,255,255,0.8); }
 .empty-state { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #999; }
+.empty-state i { font-size: 64px; margin-bottom: 16px; opacity: 0.2; }

@@ -12,10 +12,10 @@
         <aside id="sidebar" class="el-sidebar">
             <div class="aside-header">
                 <div class="brand">
-                    <i class="fas fa-book-open"></i>
+                    <i class="fas fa-book"></i>
                     <span class="brand-text">知识库</span>
                 </div>
-                <button onclick="toggleSidebar()" class="icon-btn" title="收起目录">
+                <button onclick="toggleSidebar()" class="icon-btn-side" title="收起目录">
                     <i class="fas fa-angle-double-left"></i>
                 </button>
             </div>
@@ -24,7 +24,7 @@
                 <div class="search-box">
                     <div class="search-inner">
                         <i class="fas fa-search"></i>
-                        <input type="text" id="searchInput" placeholder="搜索文档...">
+                        <input type="text" id="searchInput" placeholder="搜索知识文档...">
                     </div>
                 </div>
                 <nav id="tree-content" class="menu-tree">
@@ -42,16 +42,16 @@
         <main class="el-main">
             <header class="main-header">
                 <div class="header-left">
-                    <button id="expandBtn" onclick="toggleSidebar()" class="icon-btn expand-trigger" style="display: none;">
+                    <button id="expandBtn" onclick="toggleSidebar()" class="icon-btn-main expand-trigger" style="display: none;">
                         <i class="fas fa-bars"></i>
                     </button>
-                    <span id="currentPageTitle">未选择文档</span>
+                    <span id="currentPageTitle">请选择文档</span>
                 </div>
                 <div class="header-right">
                     <button onclick="toggleTheme()" class="theme-btn" title="切换主题">
                         <i id="themeIcon" class="fas fa-sun"></i>
                     </button>
-                    <button onclick="openExternal()" class="icon-btn" title="新标签页打开">
+                    <button onclick="openExternal()" class="icon-btn-main" title="新窗口打开">
                         <i class="fas fa-external-link-alt"></i>
                     </button>
                 </div>
@@ -61,8 +61,8 @@
                 <div id="iframeLoader" class="loader" style="display:none;"><i class="fas fa-circle-notch fa-spin"></i></div>
                 <iframe id="mainIframe" src="about:blank"></iframe>
                 <div id="emptyPlaceholder" class="empty-state">
-                    <i class="fas fa-file-lines"></i>
-                    <p>请在左侧目录选择文档进行预览</p>
+                    <i class="fas fa-file-contract"></i>
+                    <p>在左侧选择文档，即可在此处实时预览</p>
                 </div>
             </div>
         </main>

@@ -4,9 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f9e6cb97-5bbf-4446-b5e7-fe447de77f31" name="更改" comment="分页样式调整">
-      <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
-    </list>
+    <list default="true" id="f9e6cb97-5bbf-4446-b5e7-fe447de77f31" name="更改" comment="样式调整" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -71,7 +69,7 @@
       <option name="presentableId" value="Default" />
       <updated>1770175239535</updated>
       <workItem from="1770175240588" duration="3910000" />
-      <workItem from="1770188308984" duration="1048000" />
+      <workItem from="1770188308984" duration="1348000" />
     </task>
     <task id="LOCAL-00001" summary="commit">
       <option name="closed" value="true" />
@@ -193,7 +191,23 @@
       <option name="project" value="LOCAL" />
       <updated>1770188948258</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="样式调整">
+      <option name="closed" value="true" />
+      <created>1770189386100</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1770189386100</updated>
+    </task>
+    <task id="LOCAL-00017" summary="样式调整">
+      <option name="closed" value="true" />
+      <created>1770189657050</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1770189657050</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -209,9 +223,9 @@
     <MESSAGE value="忽略部分文件夹" />
     <MESSAGE value="增加暗黑模式" />
     <MESSAGE value="标题修改" />
-    <MESSAGE value="样式调整" />
     <MESSAGE value="样式调整，契合页面" />
     <MESSAGE value="分页样式调整" />
-    <option name="LAST_COMMIT_MESSAGE" value="分页样式调整" />
+    <MESSAGE value="样式调整" />
+    <option name="LAST_COMMIT_MESSAGE" value="样式调整" />
   </component>
 </project>

@@ -1,17 +1,22 @@
 const CONFIG = { pageSize: 15 };
 let rawFiles = [], filteredTree = [], currentPage = 1, fuse;
 
+// 启动初始化
 async function init() {
     initTheme();
     try {
         const res = await fetch('./list.json');
         rawFiles = await res.json();
+        // 初始化模糊搜索
         fuse = new Fuse(rawFiles, { keys: ['path'], threshold: 0.3 });
         handleSearch("");
         document.getElementById('searchInput').addEventListener('input', e => handleSearch(e.target.value));
-    } catch (e) { console.error("Index load failed"); }
+    } catch (e) {
+        console.error("加载索引失败，请检查 list.json 是否生成成功");
+    }
 }
 
+// 搜索并重新构建树
 function handleSearch(q) {
     const files = q ? fuse.search(q).map(r => r.item) : rawFiles;
     const tree = {};
@@ -28,13 +33,21 @@ function handleSearch(q) {
     updateUI();
 }
 
+// 渲染当前页
 function updateUI() {
     const container = document.getElementById('tree-content');
     const start = (currentPage - 1) * CONFIG.pageSize;
-    container.innerHTML = filteredTree.slice(start, start + CONFIG.pageSize).map(([name, node]) => renderNode(name, node)).join('');
-    document.getElementById('pageInfo').innerText = `${currentPage} / ${Math.ceil(filteredTree.length / CONFIG.pageSize) || 1}`;
+    const items = filteredTree.slice(start, start + CONFIG.pageSize);
+
+    container.innerHTML = items.length ?
+        items.map(([name, node]) => renderNode(name, node)).join('') :
+        '<div class="empty-state">未搜索到相关文档</div>';
+
+    const total = Math.ceil(filteredTree.length / CONFIG.pageSize) || 1;
+    document.getElementById('pageInfo').innerText = `${currentPage} / ${total}`;
 }
 
+// 递归渲染树节点
 function renderNode(name, node) {
     if (node._f) {
         return `<div class="file-item" onclick="loadPreview(this, './${node._f.path}', '${name}')">
@@ -49,6 +62,28 @@ function renderNode(name, node) {
     </div>`;
 }
 
+// 预览逻辑
+function loadPreview(el, url, title) {
+    document.querySelectorAll('.file-item').forEach(i => i.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('emptyPlaceholder').style.display = 'none';
+    document.getElementById('iframeLoader').style.display = 'flex';
+    document.getElementById('currentPageTitle').innerText = title;
+
+    const iframe = document.getElementById('mainIframe');
+    iframe.src = url;
+    iframe.onload = () => document.getElementById('iframeLoader').style.display = 'none';
+}
+
+// 目录折叠控制
+function toggleSidebar() {
+    const sb = document.getElementById('sidebar');
+    const eb = document.getElementById('expandBtn');
+    const isCol = sb.classList.toggle('collapsed');
+    eb.style.display = isCol ? 'block' : 'none';
+}
+
+// 文件夹展开/收起
 function toggleFolder(el) {
     const children = el.nextElementSibling;
     const arrow = el.querySelector('.icon-arrow');
@@ -58,28 +93,10 @@ function toggleFolder(el) {
     arrow.style.transition = '0.2s';
 }
 
-function loadPreview(el, url, title) {
-    document.querySelectorAll('.file-item').forEach(i => i.classList.remove('active'));
-    el.classList.add('active');
-    document.getElementById('emptyPlaceholder').style.display = 'none';
-    document.getElementById('iframeLoader').style.display = 'flex';
-    document.getElementById('currentPageTitle').innerText = title;
-    const iframe = document.getElementById('mainIframe');
-    iframe.src = url;
-    iframe.onload = () => document.getElementById('iframeLoader').style.display = 'none';
-}
-
-function toggleSidebar() {
-    const sb = document.getElementById('sidebar');
-    const eb = document.getElementById('expandBtn');
-    const isCol = sb.classList.toggle('collapsed');
-    eb.style.display = isCol ? 'block' : 'none';
-}
-
+// 主题逻辑
 function toggleTheme() {
     const html = document.documentElement;
-    const isDark = html.getAttribute('data-theme') === 'dark';
-    const next = isDark ? 'light' : 'dark';
+    const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
     html.setAttribute('data-theme', next);
     localStorage.setItem('theme', next);
     document.getElementById('themeIcon').className = next === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
