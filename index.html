@@ -3,98 +3,162 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>全目录索引 - ignorance</title>
+    <title>项目空间 - 目录树</title>
     <style>
-        :root { --primary: #1989fa; --bg: #f7f8fa; --text: #323233; --sub: #969799; }
-        body { background-color: var(--bg); font-family: -apple-system, system-ui, sans-serif; margin: 0; padding: 16px; color: var(--text); }
-        header { margin-bottom: 20px; border-left: 4px solid var(--primary); padding-left: 12px; }
-        h1 { font-size: 20px; margin: 0; }
+        :root { --primary: #1989fa; --bg: #f7f8fa; --text: #323233; --border: #ebedf0; }
+        body { background-color: var(--bg); font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 16px; color: var(--text); line-height: 1.5; }
+        header { margin-bottom: 20px; }
+        h1 { font-size: 20px; margin: 0; color: #1a1a1a; }
 
-        #file-list { list-style: none; padding: 0; }
-        .card {
-            background: #fff; border-radius: 8px; margin-bottom: 10px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        /* 树形结构样式 */
+        .tree-container { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .tree-node { border-bottom: 1px solid var(--border); }
+        .folder-header {
+            padding: 14px 16px; display: flex; align-items: center; cursor: pointer;
+            font-weight: 500; background: #fafafa; user-select: none;
         }
-        .card a {
-            display: flex; flex-direction: column; padding: 12px 16px;
-            text-decoration: none; color: inherit;
-        }
-        .file-name { font-weight: 500; font-size: 16px; margin-bottom: 4px; color: #1a1a1a; }
-        .file-path { font-size: 12px; color: var(--sub); display: flex; align-items: center; }
-        .file-path::before { content: "📁 "; margin-right: 4px; }
+        .folder-header:active { background: #f2f3f5; }
+        .folder-icon { margin-right: 8px; transition: transform 0.2s; color: #ffca28; }
+        .folder-node.open > .folder-header .folder-icon { transform: rotate(90deg); }
 
-        .loading { text-align: center; padding: 40px; color: var(--sub); font-size: 14px; }
-        #error { color: #ee0a24; text-align: center; display: none; padding: 20px; }
+        .children { display: none; padding-left: 12px; background: #fff; }
+        .folder-node.open > .children { display: block; }
+
+        .file-item {
+            padding: 12px 16px 12px 32px; display: flex; align-items: center;
+            text-decoration: none; color: var(--text); border-bottom: 1px solid var(--border);
+            font-size: 14px;
+        }
+        .file-item:last-child { border-bottom: none; }
+        .file-item:active { background: #f2f3f5; }
+        .file-icon { margin-right: 10px; color: var(--primary); font-style: normal; }
+
+        /* 分页样式 */
+        .pagination { display: flex; justify-content: center; align-items: center; margin-top: 20px; gap: 15px; }
+        .btn {
+            padding: 6px 16px; border-radius: 4px; border: 1px solid var(--border);
+            background: #fff; cursor: pointer; font-size: 14px;
+        }
+        .btn:disabled { color: #ccc; cursor: not-allowed; }
+        .page-info { font-size: 14px; color: var(--sub); }
+
+        .loading { text-align: center; padding: 40px; color: #969799; }
     </style>
 </head>
 <body>
 
 <header>
-    <h1>全仓库页面索引</h1>
-    <div style="font-size: 12px; color: var(--sub); margin-top: 4px;">自动深度扫描所有文件夹中的 HTML</div>
+    <h1>项目空间</h1>
+    <p style="font-size: 12px; color: #969799;">自动构建层级目录索引</p>
 </header>
 
-<div id="error">无法加载目录，请检查网络或仓库权限</div>
-<ul id="file-list"><div class="loading">正在深度扫描仓库资源...</div></ul>
+<div id="app">
+    <div id="tree-content" class="tree-container">
+        <div class="loading">解析文件树中...</div>
+    </div>
+    <div class="pagination">
+        <button id="prevBtn" class="btn" onclick="changePage(-1)">上一页</button>
+        <span id="pageInfo" class="page-info">1 / 1</span>
+        <button id="nextBtn" class="btn" onclick="changePage(1)">下一页</button>
+    </div>
+</div>
 
 <script>
     const CONFIG = {
         user: 'ignorance-shiyao',
         repo: 'ignorance',
-        branch: 'main' // 如果你的默认分支是 master 请改为 master
+        branch: 'main',
+        pageSize: 10 // 每页展示的一级条目数量
     };
 
-    async function fetchAllFiles() {
-        const listContainer = document.getElementById('file-list');
-        const errorContainer = document.getElementById('error');
+    let fullTree = [];
+    let currentPage = 1;
 
+    // 1. 获取并处理数据
+    async function init() {
         try {
-            // 使用 recursive=1 参数获取完整树结构
             const url = `https://api.github.com/repos/${CONFIG.user}/${CONFIG.repo}/git/trees/${CONFIG.branch}?recursive=1`;
             const response = await fetch(url);
-            if (!response.ok) throw new Error('API Error');
-
             const data = await response.json();
 
-            // 过滤逻辑：
-            // 1. 类型为 'blob' (文件)
-            // 2. 后缀为 .html
-            // 3. 排除 index.html 自身
+            // 过滤 HTML
             const htmlFiles = data.tree.filter(item =>
-                item.type === 'blob' &&
-                item.path.endsWith('.html') &&
-                item.path !== 'index.html'
+                item.type === 'blob' && item.path.endsWith('.html') && item.path !== 'index.html'
             );
 
-            if (htmlFiles.length === 0) {
-                listContainer.innerHTML = '<div class="loading">未发现任何 HTML 页面</div>';
-                return;
-            }
-
-            // 渲染列表
-            listContainer.innerHTML = htmlFiles.map(file => {
-                const pathParts = file.path.split('/');
-                const fileName = pathParts.pop(); // 获取文件名
-                const dirPath = pathParts.join('/') || '根目录'; // 获取所属文件夹路径
-
-                return `
-                <li class="card">
-                    <a href="./${file.path}">
-                        <div class="file-name">${fileName}</div>
-                        <div class="file-path">${dirPath}</div>
-                    </a>
-                </li>
-                `;
-            }).join('');
-
+            // 构建树形结构
+            fullTree = buildTree(htmlFiles);
+            render();
         } catch (err) {
-            console.error(err);
-            listContainer.style.display = 'none';
-            errorContainer.style.display = 'block';
+            document.getElementById('tree-content').innerHTML = '<div style="padding:20px;color:red;">加载失败，请检查网络或API限制</div>';
         }
     }
 
-    fetchAllFiles();
+    function buildTree(files) {
+        const root = {};
+        files.forEach(file => {
+            const parts = file.path.split('/');
+            let current = root;
+            parts.forEach((part, index) => {
+                if (!current[part]) {
+                    current[part] = index === parts.length - 1 ? { _file: file } : {};
+                }
+                current = current[part];
+            });
+        });
+        return Object.entries(root);
+    }
+
+    // 2. 渲染逻辑
+    function render() {
+        const container = document.getElementById('tree-content');
+        const start = (currentPage - 1) * CONFIG.pageSize;
+        const end = start + CONFIG.pageSize;
+        const pageItems = fullTree.slice(start, end);
+
+        container.innerHTML = pageItems.map(([name, node]) => renderNode(name, node)).join('');
+
+        // 更新分页状态
+        const totalPages = Math.ceil(fullTree.length / CONFIG.pageSize) || 1;
+        document.getElementById('pageInfo').innerText = `${currentPage} / ${totalPages}`;
+        document.getElementById('prevBtn').disabled = currentPage === 1;
+        document.getElementById('nextBtn').disabled = currentPage === totalPages;
+    }
+
+    function renderNode(name, node, path = '') {
+        const currentPath = path ? `${path}/${name}` : name;
+
+        // 如果是文件
+        if (node._file) {
+            return `
+                <a class="file-item" href="./${node._file.path}">
+                    <i class="file-icon">📄</i>
+                    <span>${name}</span>
+                </a>`;
+        }
+
+        // 如果是文件夹
+        const childHtml = Object.entries(node)
+            .map(([childName, childNode]) => renderNode(childName, childNode, currentPath))
+            .join('');
+
+        return `
+            <div class="folder-node">
+                <div class="folder-header" onclick="this.parentElement.classList.toggle('open')">
+                    <span class="folder-icon">▶</span>
+                    <span>${name}</span>
+                </div>
+                <div class="children">${childHtml}</div>
+            </div>`;
+    }
+
+    function changePage(step) {
+        currentPage += step;
+        render();
+        window.scrollTo(0, 0);
+    }
+
+    init();
 </script>
 
 </body>
