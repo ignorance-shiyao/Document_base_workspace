@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f9e6cb97-5bbf-4446-b5e7-fe447de77f31" name="更改" comment="重构">
+    <list default="true" id="f9e6cb97-5bbf-4446-b5e7-fe447de77f31" name="更改" comment="样式优化&amp;页面内容弹框展示">
       <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -70,7 +70,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1770175239535</updated>
-      <workItem from="1770175240588" duration="2542000" />
+      <workItem from="1770175240588" duration="2850000" />
     </task>
     <task id="LOCAL-00001" summary="commit">
       <option name="closed" value="true" />
@@ -128,7 +128,15 @@
       <option name="project" value="LOCAL" />
       <updated>1770186261858</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="样式优化&amp;页面内容弹框展示">
+      <option name="closed" value="true" />
+      <created>1770186945498</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1770186945498</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -139,6 +147,7 @@
     <MESSAGE value="修改主页索引" />
     <MESSAGE value="修改主页索引,样式，增加搜索" />
     <MESSAGE value="重构" />
-    <option name="LAST_COMMIT_MESSAGE" value="重构" />
+    <MESSAGE value="样式优化&amp;页面内容弹框展示" />
+    <option name="LAST_COMMIT_MESSAGE" value="样式优化&amp;页面内容弹框展示" />
   </component>
 </project>
