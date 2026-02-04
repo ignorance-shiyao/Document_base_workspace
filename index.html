@@ -1,65 +1,69 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>项目支撑系统 | 工作台</title>
+    <title>项目看板 | 工作台</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="app" class="el-wrapper">
-        <aside class="el-sidebar">
-            <div class="logo-area">
-                <div class="logo-icon"><i class="fas fa-cubes"></i></div>
-                <div class="logo-text">Ignorance <span>OS</span></div>
-            </div>
-
-            <div class="search-container">
-                <div class="el-input-inner">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="searchInput" placeholder="搜索资源文件名...">
+    <div id="app" class="el-container">
+        <aside id="sidebar" class="el-aside">
+            <div class="aside-header">
+                <div class="brand">
+                    <i class="fas fa-terminal"></i>
+                    <span class="brand-text">Ignorance OS</span>
                 </div>
+                <button onclick="toggleSidebar()" class="toggle-trigger" title="收起菜单">
+                    <i class="fas fa-indent"></i>
+                </button>
             </div>
 
-            <nav id="tree-content" class="menu-tree">
-                <div class="skeleton">加载索引中...</div>
-            </nav>
+            <div class="aside-content">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="搜索资源...">
+                </div>
+                <nav id="tree-content" class="el-menu-tree">
+                    <div class="loading">初始化资源...</div>
+                </nav>
+            </div>
 
-            <div class="pagination-footer">
-                <button class="page-btn" onclick="changePage(-1)"><i class="fas fa-angle-left"></i></button>
-                <span id="pageInfo" class="page-num">1 / 1</span>
-                <button class="page-btn" onclick="changePage(1)"><i class="fas fa-angle-right"></i></button>
+            <div class="aside-footer">
+                <button onclick="changePage(-1)"><i class="fas fa-chevron-left"></i></button>
+                <span id="pageInfo">1/1</span>
+                <button onclick="changePage(1)"><i class="fas fa-chevron-right"></i></button>
             </div>
         </aside>
 
-        <main class="el-viewport">
-            <div class="empty-state">
-                <div class="empty-icon"><i class="far fa-folder-open"></i></div>
-                <p>请从左侧资源树中选择页面进行预览</p>
-                <small>支持全屏预览与多级目录检索</small>
+        <main class="el-main">
+            <header class="main-header">
+                <div class="current-info">
+                    <button id="expandMenu" onclick="toggleSidebar()" class="expand-trigger" style="display:none;">
+                        <i class="fas fa-outdent"></i>
+                    </button>
+                    <span id="currentPageTitle">未选择文件</span>
+                </div>
+                <div class="header-actions">
+                    <button onclick="toggleTheme()" class="action-btn" title="切换暗色模式">
+                        <i id="themeIcon" class="fas fa-moon"></i>
+                    </button>
+                    <button onclick="openExternal()" class="action-btn" title="外部打开">
+                        <i class="fas fa-external-link-alt"></i>
+                    </button>
+                </div>
+            </header>
+
+            <div class="iframe-container">
+                <div id="iframeLoader" class="loader" style="display:none;"><i class="fas fa-spinner fa-spin"></i></div>
+                <iframe id="mainIframe" src="about:blank"></iframe>
+                <div id="emptyPlaceholder" class="empty-state">
+                    <i class="fas fa-file-code"></i>
+                    <p>选择左侧文件开启实时预览</p>
+                </div>
             </div>
         </main>
-
-        <div id="dialogOverlay" class="el-overlay" style="display: none;">
-            <div id="elDialog" class="el-dialog" data-state="normal">
-                <div class="el-dialog-header" ondblclick="toggleSize()">
-                    <span class="title-wrap">
-                        <i class="far fa-file-alt"></i>
-                        <span id="dialogTitle">页面预览</span>
-                    </span>
-                    <div class="control-btns">
-                        <button onclick="toggleSize()" class="ctrl-btn" title="切换全屏/窗口"><i class="fas fa-expand-arrows-alt"></i></button>
-                        <button onclick="openNewTab()" class="ctrl-btn" title="新窗口打开"><i class="fas fa-external-link-alt"></i></button>
-                        <button onclick="closeDialog()" class="ctrl-btn close" title="关闭"><i class="fas fa-times"></i></button>
-                    </div>
-                </div>
-                <div class="el-dialog-body">
-                    <div class="iframe-loading" id="iframeLoader"><i class="fas fa-circle-notch fa-spin"></i></div>
-                    <iframe id="previewIframe" src="about:blank" onload="document.getElementById('iframeLoader').style.display='none'"></iframe>
-                </div>
-            </div>
-        </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
     <script src="app.js"></script>

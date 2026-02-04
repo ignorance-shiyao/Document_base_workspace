@@ -4,9 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f9e6cb97-5bbf-4446-b5e7-fe447de77f31" name="更改" comment="样式优化&amp;页面内容弹框展示">
-      <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
-    </list>
+    <list default="true" id="f9e6cb97-5bbf-4446-b5e7-fe447de77f31" name="更改" comment="忽略部分文件夹" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -70,7 +68,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1770175239535</updated>
-      <workItem from="1770175240588" duration="2850000" />
+      <workItem from="1770175240588" duration="3233000" />
     </task>
     <task id="LOCAL-00001" summary="commit">
       <option name="closed" value="true" />
@@ -136,7 +134,23 @@
       <option name="project" value="LOCAL" />
       <updated>1770186945498</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="样式优化">
+      <option name="closed" value="true" />
+      <created>1770187273107</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1770187273107</updated>
+    </task>
+    <task id="LOCAL-00010" summary="忽略部分文件夹">
+      <option name="closed" value="true" />
+      <created>1770187343210</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1770187343210</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -148,6 +162,8 @@
     <MESSAGE value="修改主页索引,样式，增加搜索" />
     <MESSAGE value="重构" />
     <MESSAGE value="样式优化&amp;页面内容弹框展示" />
-    <option name="LAST_COMMIT_MESSAGE" value="样式优化&amp;页面内容弹框展示" />
+    <MESSAGE value="样式优化" />
+    <MESSAGE value="忽略部分文件夹" />
+    <option name="LAST_COMMIT_MESSAGE" value="忽略部分文件夹" />
   </component>
 </project>
