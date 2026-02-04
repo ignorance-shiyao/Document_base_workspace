@@ -1,71 +1,80 @@
-/* ...保留之前的变量定义... */
-
-/* 移动端专用遮罩 */
-.sidebar-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.5);
-    backdrop-filter: blur(2px);
-    z-index: 90;
+:root[data-theme="light"] {
+    --side-bg: #f8f9fa;
+    --side-text: #4a5568;
+    --side-hover: #edf2f7;
+    --main-bg: #ffffff;
+    --header-bg: #ffffff;
+    --card-bg: #f7fafc;
+    --text-main: #2d3748;
+    --border: #e2e8f0;
+    --accent: #3182ce;
 }
 
-/* 响应式适配逻辑 */
-@media (max-width: 768px) {
-    .el-sidebar {
-        position: fixed;
-        left: -280px; /* 默认隐藏在左侧 */
-        height: 100%;
-        box-shadow: 10px 0 20px rgba(0,0,0,0.1);
-        z-index: 100;
-    }
-
-    .el-sidebar.active {
-        transform: translateX(280px);
-    }
-
-    .sidebar-overlay.active {
-        display: block;
-    }
-
-    .hide-on-mobile {
-        display: none;
-    }
-
-    .el-main {
-        width: 100%;
-    }
-
-    .main-header {
-        padding: 0 10px;
-    }
-
-    .brand-text {
-        font-size: 14px;
-    }
-
-    /* 优化移动端触控目标大小 */
-    .file-item, .folder-header {
-        padding: 12px 15px;
-        margin-bottom: 5px;
-    }
-
-    .iframe-container {
-        padding: 5px; /* 移动端减小间距，利用最大视野 */
-    }
-
-    #mainIframe {
-        border-radius: 4px;
-    }
+:root[data-theme="dark"] {
+    --side-bg: #1a202c;
+    --side-text: #a0aec0;
+    --side-hover: #2d3748;
+    --main-bg: #0f172a;
+    --header-bg: #1a202c;
+    --card-bg: #1e293b;
+    --text-main: #f7fafc;
+    --border: #2d3748;
+    --accent: #63b3ed;
 }
 
-/* ...保留之前的 PC 端样式... */
+body, html { margin: 0; padding: 0; height: 100%; font-family: -apple-system, sans-serif; transition: background 0.3s; }
+.el-container { display: flex; height: 100vh; overflow: hidden; background: var(--main-bg); }
+
+/* 遮罩层 */
+.sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 90; backdrop-filter: blur(2px); }
+.sidebar-overlay.active { display: block; }
+
+/* 侧边栏架构 */
 .el-sidebar {
     width: 280px; background: var(--side-bg); display: flex; flex-direction: column;
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border-right: 1px solid var(--border);
 }
 
-/* PC 端折叠逻辑 */
+.aside-header { padding: 18px 20px; display: flex; justify-content: space-between; align-items: center; color: var(--text-main); }
+.brand { font-weight: 700; display: flex; align-items: center; gap: 8px; color: var(--accent); }
+
+.search-box { padding: 0 15px 15px; }
+.search-inner { position: relative; background: var(--main-bg); border-radius: 6px; border: 1px solid var(--border); }
+.search-inner i { position: absolute; left: 10px; top: 10px; color: var(--side-text); font-size: 12px; }
+.search-inner input { width: 100%; background: transparent; border: none; padding: 8px 10px 8px 32px; color: var(--text-main); outline: none; font-size: 13px; box-sizing: border-box; }
+
+.menu-tree { flex: 1; overflow-y: auto; padding: 10px; }
+.file-item, .folder-header { padding: 10px 12px; color: var(--side-text); cursor: pointer; border-radius: 6px; display: flex; align-items: center; gap: 10px; font-size: 13px; margin-bottom: 2px; }
+.file-item:hover, .folder-header:hover { background: var(--side-hover); color: var(--accent); }
+.file-item.active { background: var(--accent); color: #fff !important; }
+
+.aside-footer { padding: 12px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; color: var(--side-text); }
+
+/* 主区域 */
+.el-main { flex: 1; display: flex; flex-direction: column; min-width: 0; background: var(--card-bg); }
+.main-header { height: 56px; background: var(--header-bg); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; padding: 0 20px; }
+.header-left { display: flex; align-items: center; gap: 15px; color: var(--text-main); font-weight: 600; }
+
+.iframe-container { flex: 1; position: relative; padding: 15px; }
+#mainIframe { width: 100%; height: 100%; border: none; border-radius: 8px; background: #fff; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+
+/* 按钮样式 */
+.icon-btn-side, .icon-btn-main, .theme-btn, .page-btn { background: transparent; border: none; cursor: pointer; color: var(--side-text); padding: 8px; border-radius: 6px; }
+.theme-btn:hover { color: var(--accent); background: var(--side-hover); }
+
+/* 响应式媒体查询 */
+@media (max-width: 768px) {
+    .el-sidebar { position: fixed; left: -280px; height: 100%; z-index: 100; }
+    .el-sidebar.mobile-active { transform: translateX(280px); }
+    .pc-only { display: none; }
+    .iframe-container { padding: 5px; }
+}
+
 @media (min-width: 769px) {
     .el-sidebar.collapsed { width: 0; transform: translateX(-280px); border: none; }
+    #expandBtn { display: none !important; }
+    .el-sidebar.collapsed ~ .el-main #expandBtn { display: block !important; }
 }
+
+.loader { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--accent); font-size: 24px; background: var(--main-bg); opacity: 0.8; }
+.empty-state { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--side-text); opacity: 0.5; }

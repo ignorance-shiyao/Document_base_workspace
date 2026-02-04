@@ -17,7 +17,7 @@
                     <i class="fas fa-book"></i>
                     <span class="brand-text">知识库</span>
                 </div>
-                <button onclick="toggleSidebar()" class="icon-btn-side hide-on-mobile">
+                <button onclick="toggleSidebar()" class="icon-btn-side pc-only">
                     <i class="fas fa-angle-double-left"></i>
                 </button>
             </div>
@@ -44,7 +44,7 @@
         <main class="el-main">
             <header class="main-header">
                 <div class="header-left">
-                    <button id="mobileMenuBtn" onclick="toggleSidebar()" class="icon-btn-main">
+                    <button id="expandBtn" onclick="toggleSidebar()" class="icon-btn-main">
                         <i class="fas fa-bars"></i>
                     </button>
                     <span id="currentPageTitle">请选择文档</span>
@@ -52,6 +52,9 @@
                 <div class="header-right">
                     <button onclick="toggleTheme()" class="theme-btn">
                         <i id="themeIcon" class="fas fa-sun"></i>
+                    </button>
+                    <button onclick="openExternal()" class="icon-btn-main pc-only">
+                        <i class="fas fa-external-link-alt"></i>
                     </button>
                 </div>
             </header>
@@ -61,7 +64,7 @@
                 <iframe id="mainIframe" src="about:blank"></iframe>
                 <div id="emptyPlaceholder" class="empty-state">
                     <i class="fas fa-file-invoice"></i>
-                    <p>选择文档开启预览</p>
+                    <p>在左侧选择文档开启预览</p>
                 </div>
             </div>
         </main>
