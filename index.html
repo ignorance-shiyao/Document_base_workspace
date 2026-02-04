@@ -2,20 +2,22 @@
 <html lang="zh-CN" data-theme="light">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>知识库</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div id="app" class="el-container">
+        <div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
         <aside id="sidebar" class="el-sidebar">
             <div class="aside-header">
                 <div class="brand">
                     <i class="fas fa-book"></i>
                     <span class="brand-text">知识库</span>
                 </div>
-                <button onclick="toggleSidebar()" class="icon-btn-side" title="收起目录">
+                <button onclick="toggleSidebar()" class="icon-btn-side hide-on-mobile">
                     <i class="fas fa-angle-double-left"></i>
                 </button>
             </div>
@@ -42,17 +44,14 @@
         <main class="el-main">
             <header class="main-header">
                 <div class="header-left">
-                    <button id="expandBtn" onclick="toggleSidebar()" class="icon-btn-main" style="display: none;">
+                    <button id="mobileMenuBtn" onclick="toggleSidebar()" class="icon-btn-main">
                         <i class="fas fa-bars"></i>
                     </button>
                     <span id="currentPageTitle">请选择文档</span>
                 </div>
                 <div class="header-right">
-                    <button onclick="toggleTheme()" class="theme-btn" title="切换暗色/浅色">
+                    <button onclick="toggleTheme()" class="theme-btn">
                         <i id="themeIcon" class="fas fa-sun"></i>
-                    </button>
-                    <button onclick="openExternal()" class="icon-btn-main" title="新窗口打开">
-                        <i class="fas fa-external-link-alt"></i>
                     </button>
                 </div>
             </header>
@@ -62,7 +61,7 @@
                 <iframe id="mainIframe" src="about:blank"></iframe>
                 <div id="emptyPlaceholder" class="empty-state">
                     <i class="fas fa-file-invoice"></i>
-                    <p>在左侧选择文档开启预览</p>
+                    <p>选择文档开启预览</p>
                 </div>
             </div>
         </main>
