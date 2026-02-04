@@ -1,2 +1,21 @@
-<h1>ignorance</h1>
-<p>ignorance</p>
+<ul id="file-list">加载中...</ul>
+
+<script>
+  const repo = 'ignorance-shiyao/ignorance';
+  const url = `https://api.github.com/repos/${repo}/contents/`;
+
+  fetch(url)
+    .then(res => res.json())
+    .then(data => {
+      const list = document.getElementById('file-list');
+      list.innerHTML = ''; // 清空
+      data.forEach(file => {
+        // 只显示 .html 文件，且排除 index.html
+        if (file.name.endsWith('.html') && file.name !== 'index.html') {
+          const li = document.createElement('li');
+          li.innerHTML = `<a href="./${file.name}">${file.name}</a>`;
+          list.appendChild(li);
+        }
+      });
+    });
+</script>
