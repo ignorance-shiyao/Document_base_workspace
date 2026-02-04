@@ -1,31 +1,20 @@
-const CONFIG = { pageSize: 100 }; // 既然是知识库，增加单页显示数量
-let rawFiles = [], filteredTree = [], fuse;
+const CONFIG = { pageSize: 15 };
+let rawFiles = [], filteredTree = [], currentPage = 1, fuse;
 
 async function init() {
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    document.documentElement.setAttribute('data-theme', savedTheme);
-
+    initTheme();
     try {
         const res = await fetch('./list.json');
         rawFiles = await res.json();
-        fuse = new Fuse(rawFiles, { keys: ['path'], threshold: 0.4 });
-        renderList(rawFiles);
-
-        document.getElementById('searchInput').addEventListener('input', (e) => {
-            const query = e.target.value.trim();
-            const results = query ? fuse.search(query).map(r => r.item) : rawFiles;
-            renderList(results);
-        });
-    } catch (e) {
-        console.error("未能加载索引文件 list.json");
-    }
+        fuse = new Fuse(rawFiles, { keys: ['path'], threshold: 0.3 });
+        handleSearch("");
+        document.getElementById('searchInput').addEventListener('input', e => handleSearch(e.target.value));
+    } catch (e) { console.error("Index load failed"); }
 }
 
-function renderList(files) {
-    const container = document.getElementById('tree-content');
+function handleSearch(q) {
+    const files = q ? fuse.search(q).map(r => r.item) : rawFiles;
     const tree = {};
-
-    // 构建简单层级（根据你的参考图，展示方式偏向扁平卡片）
     files.forEach(f => {
         const parts = f.path.split('/');
         let cur = tree;
@@ -34,47 +23,85 @@ function renderList(files) {
             cur = cur[p];
         });
     });
-
-    container.innerHTML = Object.entries(tree).map(([name, node]) => createNodeHtml(name, node)).join('');
+    filteredTree = Object.entries(tree);
+    currentPage = 1;
+    updateUI();
 }
 
-function createNodeHtml(name, node) {
+function updateUI() {
+    const container = document.getElementById('tree-content');
+    const start = (currentPage - 1) * CONFIG.pageSize;
+    container.innerHTML = filteredTree.slice(start, start + CONFIG.pageSize).map(([name, node]) => renderNode(name, node)).join('');
+    document.getElementById('pageInfo').innerText = `${currentPage} / ${Math.ceil(filteredTree.length / CONFIG.pageSize) || 1}`;
+}
+
+function renderNode(name, node) {
     if (node._f) {
-        return `
-            <div class="file-item" onclick="loadPage(this, './${node._f.path}', '${name}')">
-                <i class="far fa-file-lines"></i>
-                <span>${name}</span>
-            </div>`;
+        return `<div class="file-item" onclick="loadPreview(this, './${node._f.path}', '${name}')">
+            <i class="far fa-file-alt"></i><span>${name}</span></div>`;
     }
-    const children = Object.entries(node).map(([n, v]) => createNodeHtml(n, v)).join('');
-    return `
-        <div class="folder-group">
-            <div class="folder-header" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'">
-                <i class="fas fa-chevron-right"></i>
-                <span>${name}</span>
-            </div>
-            <div class="folder-content" style="display:none; padding-left:15px;">${children}</div>
-        </div>`;
+    const children = Object.entries(node).map(([n,v]) => renderNode(n,v)).join('');
+    return `<div class="folder-group">
+        <div class="folder-header" onclick="toggleFolder(this)">
+            <i class="fas fa-chevron-right icon-arrow"></i><i class="fas fa-folder"></i><span>${name}</span>
+        </div>
+        <div class="folder-children" style="display:none; padding-left:18px;">${children}</div>
+    </div>`;
 }
 
-function loadPage(el, url, title) {
-    document.querySelectorAll('.file-item').forEach(item => item.classList.remove('active'));
-    el.classList.add('active');
+function toggleFolder(el) {
+    const children = el.nextElementSibling;
+    const arrow = el.querySelector('.icon-arrow');
+    const isOpen = children.style.display === 'block';
+    children.style.display = isOpen ? 'none' : 'block';
+    arrow.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(90deg)';
+    arrow.style.transition = '0.2s';
+}
 
+function loadPreview(el, url, title) {
+    document.querySelectorAll('.file-item').forEach(i => i.classList.remove('active'));
+    el.classList.add('active');
     document.getElementById('emptyPlaceholder').style.display = 'none';
     document.getElementById('iframeLoader').style.display = 'flex';
     document.getElementById('currentPageTitle').innerText = title;
-
     const iframe = document.getElementById('mainIframe');
     iframe.src = url;
     iframe.onload = () => document.getElementById('iframeLoader').style.display = 'none';
 }
 
+function toggleSidebar() {
+    const sb = document.getElementById('sidebar');
+    const eb = document.getElementById('expandBtn');
+    const isCol = sb.classList.toggle('collapsed');
+    eb.style.display = isCol ? 'block' : 'none';
+}
+
 function toggleTheme() {
-    const current = document.documentElement.getAttribute('data-theme');
-    const next = current === 'light' ? 'dark' : 'light';
-    document.documentElement.setAttribute('data-theme', next);
+    const html = document.documentElement;
+    const isDark = html.getAttribute('data-theme') === 'dark';
+    const next = isDark ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
     localStorage.setItem('theme', next);
+    document.getElementById('themeIcon').className = next === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+}
+
+function initTheme() {
+    const saved = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', saved);
+    document.getElementById('themeIcon').className = saved === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+}
+
+function openExternal() {
+    const url = document.getElementById('mainIframe').src;
+    if (url && url !== 'about:blank') window.open(url, '_blank');
+}
+
+function changePage(s) {
+    const total = Math.ceil(filteredTree.length / CONFIG.pageSize) || 1;
+    if (currentPage + s >= 1 && currentPage + s <= total) {
+        currentPage += s;
+        updateUI();
+    }
 }
 
 init();

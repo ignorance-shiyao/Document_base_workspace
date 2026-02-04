@@ -9,52 +9,60 @@
 </head>
 <body>
     <div id="app" class="el-container">
-        <aside id="sidebar" class="el-aside">
-            <div class="aside-brand">
-                <i class="fas fa-list-ul"></i>
-                <i class="fas fa-paw brand-center-logo"></i>
-                <i class="fas fa-search"></i>
+        <aside id="sidebar" class="el-sidebar">
+            <div class="aside-header">
+                <div class="brand">
+                    <i class="fas fa-book-open"></i>
+                    <span class="brand-text">知识库</span>
+                </div>
+                <button onclick="toggleSidebar()" class="icon-btn" title="收起目录">
+                    <i class="fas fa-angle-double-left"></i>
+                </button>
             </div>
 
-            <div class="aside-scroll-area">
-                <div class="status-card">
-                    <i class="fas fa-list-check"></i>
-                    <span class="status-text">Knowledge "Base.at</span>
-                    <div class="status-btns">
-                        <i class="fas fa-sun" onclick="toggleTheme()"></i>
-                        <i class="fas fa-link"></i>
-                    </div>
-                </div>
-
+            <div class="aside-content">
                 <div class="search-box">
                     <div class="search-inner">
                         <i class="fas fa-search"></i>
-                        <input type="text" id="searchInput" placeholder="Search...">
+                        <input type="text" id="searchInput" placeholder="搜索文档...">
                     </div>
                 </div>
-
-                <nav id="tree-content" class="el-menu-tree">
-                    <div class="loading">正在同步索引...</div>
+                <nav id="tree-content" class="menu-tree">
+                    <div class="loading">正在加载索引...</div>
                 </nav>
             </div>
 
             <div class="aside-footer">
-                <div class="footer-left"><i class="fas fa-plus"></i></div>
-                <div class="footer-center" id="currentPageTitle">知识库首页</div>
-                <div class="footer-right">
-                    <i class="fas fa-ellipsis-v"></i>
-                    <i class="fas fa-table-list"></i>
-                </div>
+                <button class="page-btn" onclick="changePage(-1)"><i class="fas fa-chevron-left"></i></button>
+                <span id="pageInfo">1 / 1</span>
+                <button class="page-btn" onclick="changePage(1)"><i class="fas fa-chevron-right"></i></button>
             </div>
         </aside>
 
         <main class="el-main">
-            <div class="main-body">
-                <div id="iframeLoader" class="loader" style="display:none;"><i class="fas fa-spinner fa-spin"></i></div>
+            <header class="main-header">
+                <div class="header-left">
+                    <button id="expandBtn" onclick="toggleSidebar()" class="icon-btn expand-trigger" style="display: none;">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <span id="currentPageTitle">未选择文档</span>
+                </div>
+                <div class="header-right">
+                    <button onclick="toggleTheme()" class="theme-btn" title="切换主题">
+                        <i id="themeIcon" class="fas fa-sun"></i>
+                    </button>
+                    <button onclick="openExternal()" class="icon-btn" title="新标签页打开">
+                        <i class="fas fa-external-link-alt"></i>
+                    </button>
+                </div>
+            </header>
+
+            <div class="iframe-container">
+                <div id="iframeLoader" class="loader" style="display:none;"><i class="fas fa-circle-notch fa-spin"></i></div>
                 <iframe id="mainIframe" src="about:blank"></iframe>
                 <div id="emptyPlaceholder" class="empty-state">
-                    <i class="fas fa-file-circle-check"></i>
-                    <p>选择资源以开启工作台预览</p>
+                    <i class="fas fa-file-lines"></i>
+                    <p>请在左侧目录选择文档进行预览</p>
                 </div>
             </div>
         </main>
