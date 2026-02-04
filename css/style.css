@@ -19,7 +19,7 @@
     --card-bg: #1e293b;
     --text-main: #f7fafc;
     --border: #2d3748;
-    --accent: #63b3ed;
+    --accent: #3e8fff;
 }
 
 body, html { margin: 0; padding: 0; height: 100%; font-family: -apple-system, sans-serif; transition: background 0.3s; }
