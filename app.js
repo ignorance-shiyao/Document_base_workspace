@@ -1,20 +1,31 @@
-const CONFIG = { pageSize: 15 };
-let rawFiles = [], filteredTree = [], currentPage = 1, fuse;
+const CONFIG = { pageSize: 100 }; // 既然是知识库，增加单页显示数量
+let rawFiles = [], filteredTree = [], fuse;
 
 async function init() {
-    initTheme();
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+
     try {
         const res = await fetch('./list.json');
         rawFiles = await res.json();
-        fuse = new Fuse(rawFiles, { keys: ['path'], threshold: 0.3 });
-        handleSearch("");
-        document.getElementById('searchInput').addEventListener('input', e => handleSearch(e.target.value));
-    } catch (e) { console.error("Index load failed"); }
+        fuse = new Fuse(rawFiles, { keys: ['path'], threshold: 0.4 });
+        renderList(rawFiles);
+
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const query = e.target.value.trim();
+            const results = query ? fuse.search(query).map(r => r.item) : rawFiles;
+            renderList(results);
+        });
+    } catch (e) {
+        console.error("未能加载索引文件 list.json");
+    }
 }
 
-function handleSearch(q) {
-    const files = q ? fuse.search(q).map(r => r.item) : rawFiles;
+function renderList(files) {
+    const container = document.getElementById('tree-content');
     const tree = {};
+
+    // 构建简单层级（根据你的参考图，展示方式偏向扁平卡片）
     files.forEach(f => {
         const parts = f.path.split('/');
         let cur = tree;
@@ -23,35 +34,31 @@ function handleSearch(q) {
             cur = cur[p];
         });
     });
-    filteredTree = Object.entries(tree);
-    updateUI();
+
+    container.innerHTML = Object.entries(tree).map(([name, node]) => createNodeHtml(name, node)).join('');
 }
 
-function renderNode(name, node) {
+function createNodeHtml(name, node) {
     if (node._f) {
-        return `<div class="file-item" data-path="${node._f.path}" onclick="loadPreview(this, './${node._f.path}', '${name}')">
-            <i class="far fa-file-alt"></i><span>${name}</span></div>`;
+        return `
+            <div class="file-item" onclick="loadPage(this, './${node._f.path}', '${name}')">
+                <i class="far fa-file-lines"></i>
+                <span>${name}</span>
+            </div>`;
     }
-    const children = Object.entries(node).map(([n,v]) => renderNode(n,v)).join('');
-    return `<div class="folder-group">
-        <div class="folder-header" onclick="toggleFolder(this)">
-            <i class="fas fa-chevron-right"></i><i class="fas fa-folder"></i><span>${name}</span>
-        </div>
-        <div class="folder-children" style="display:none; padding-left:15px;">${children}</div>
-    </div>`;
+    const children = Object.entries(node).map(([n, v]) => createNodeHtml(n, v)).join('');
+    return `
+        <div class="folder-group">
+            <div class="folder-header" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'">
+                <i class="fas fa-chevron-right"></i>
+                <span>${name}</span>
+            </div>
+            <div class="folder-content" style="display:none; padding-left:15px;">${children}</div>
+        </div>`;
 }
 
-function toggleFolder(el) {
-    const children = el.nextElementSibling;
-    const icon = el.querySelector('.fa-chevron-right');
-    const isOpen = children.style.display === 'block';
-    children.style.display = isOpen ? 'none' : 'block';
-    icon.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(90deg)';
-    icon.style.transition = '0.2s';
-}
-
-function loadPreview(el, url, title) {
-    document.querySelectorAll('.file-item').forEach(i => i.classList.remove('active'));
+function loadPage(el, url, title) {
+    document.querySelectorAll('.file-item').forEach(item => item.classList.remove('active'));
     el.classList.add('active');
 
     document.getElementById('emptyPlaceholder').style.display = 'none';
@@ -64,55 +71,10 @@ function loadPreview(el, url, title) {
 }
 
 function toggleTheme() {
-    const html = document.documentElement;
-    const isDark = html.getAttribute('data-theme') === 'dark';
-    const next = isDark ? 'light' : 'dark';
-    html.setAttribute('data-theme', next);
+    const current = document.documentElement.getAttribute('data-theme');
+    const next = current === 'light' ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', next);
     localStorage.setItem('theme', next);
-    document.getElementById('themeIcon').className = next === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
-}
-
-function initTheme() {
-    const saved = localStorage.getItem('theme') || 'light';
-    document.documentElement.setAttribute('data-theme', saved);
-    document.getElementById('themeIcon').className = saved === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
-}
-
-function toggleSidebar() {
-    const sb = document.getElementById('sidebar');
-    const eb = document.getElementById('expandMenu');
-    const isCol = sb.classList.toggle('collapsed');
-    eb.style.display = isCol ? 'block' : 'none';
-}
-
-function updateUI() {
-    const container = document.getElementById('tree-content');
-    const start = (currentPage - 1) * CONFIG.pageSize;
-    const totalPages = Math.ceil(filteredTree.length / CONFIG.pageSize) || 1;
-
-    // 渲染列表
-    container.innerHTML = filteredTree
-        .slice(start, start + CONFIG.pageSize)
-        .map(([name, node]) => renderNode(name, node))
-        .join('');
-
-    // 更新页码显示
-    document.getElementById('pageInfo').innerText = `${currentPage} / ${totalPages}`;
-
-    // 更新按钮状态：根据当前页码自动禁用/开启
-    const prevBtn = document.querySelector('.page-btn[onclick*="-1"]');
-    const nextBtn = document.querySelector('.page-btn[onclick*="1"]');
-
-    if (prevBtn) prevBtn.disabled = (currentPage === 1);
-    if (nextBtn) nextBtn.disabled = (currentPage === totalPages);
-}
-
-function changePage(s) {
-    const total = Math.ceil(filteredTree.length / CONFIG.pageSize) || 1;
-    if (currentPage + s >= 1 && currentPage + s <= total) {
-        currentPage += s;
-        updateUI();
-    }
 }
 
 init();
