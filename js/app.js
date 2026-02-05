@@ -1,6 +1,8 @@
 /**
- * 知识库核心逻辑控制
- * 包含：索引加载、模糊搜索、目录树渲染、主题同步预览、移动端适配
+ * 知识库核心逻辑控制 (全量版)
+ * 1. 自动根据主页面主题传递 ?cs=light 或 ?cs=dark 给预览页面
+ * 2. 支持主题切换时 iframe 实时热重载
+ * 3. 适配移动端抽屉式菜单与 PC 端物理缩进
  */
 
 const CONFIG = { 
@@ -41,7 +43,6 @@ function handleSearch(q) {
     const files = q.trim() ? fuse.search(q).map(r => r.item) : rawFiles;
     const tree = {};
     
-    // 构建树形结构
     files.forEach(f => {
         const parts = f.path.split('/');
         let cur = tree;
@@ -59,12 +60,10 @@ function handleSearch(q) {
 // 3. 树形菜单渲染
 function renderNode(name, node) {
     if (node._f) {
-        // 文件节点：存储原始路径以便 loadPreview 调用
         return `<div class="file-item" data-path="./${node._f.path}" data-name="${name}" onclick="onFileClick(this)">
             <i class="far fa-file-alt"></i><span>${name}</span></div>`;
     }
     
-    // 文件夹节点
     const children = Object.entries(node).map(([n,v]) => renderNode(n,v)).join('');
     return `<div class="folder-group">
         <div class="folder-header" onclick="toggleFolder(this)">
@@ -89,7 +88,7 @@ function updateUI() {
     if (pageInfo) pageInfo.innerText = `${currentPage} / ${total}`;
 }
 
-// 5. 核心预览逻辑：主题参数传值
+// 5. 核心预览逻辑：显式传递 cs=light 或 cs=dark
 function onFileClick(el) {
     const url = el.getAttribute('data-path');
     const name = el.getAttribute('data-name');
@@ -97,21 +96,20 @@ function onFileClick(el) {
 }
 
 function loadPreview(el, url, title) {
-    // 移动端处理
+    // 移动端选择后自动收起
     if (window.innerWidth <= 768) {
         const sb = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebarOverlay');
-        if (sb.classList.contains('mobile-active')) {
+        if (sb && sb.classList.contains('mobile-active')) {
             sb.classList.remove('mobile-active');
-            overlay.classList.remove('active');
+            if (overlay) overlay.classList.remove('active');
         }
     }
 
-    // 选中状态切换
+    // 选中状态样式
     document.querySelectorAll('.file-item').forEach(i => i.classList.remove('active'));
     el.classList.add('active');
     
-    // UI 反馈
     const placeholder = document.getElementById('emptyPlaceholder');
     const loader = document.getElementById('iframeLoader');
     const titleEl = document.getElementById('currentPageTitle');
@@ -120,13 +118,10 @@ function loadPreview(el, url, title) {
     if (loader) loader.style.display = 'flex';
     if (titleEl) titleEl.innerText = title;
 
-    // --- 主题传值核心实现 ---
-    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-    let finalUrl = url;
-    if (isDark) {
-        // 判断原路径是否已有参数
-        finalUrl += (url.includes('?') ? '&' : '?') + 'cs=dark';
-    }
+    // --- 核心逻辑：显式拼接主题参数 ---
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+    const separator = url.includes('?') ? '&' : '?';
+    const finalUrl = `${url}${separator}cs=${currentTheme}`;
 
     const iframe = document.getElementById('mainIframe');
     if (iframe) {
@@ -137,7 +132,7 @@ function loadPreview(el, url, title) {
     }
 }
 
-// 6. 主题控制逻辑
+// 6. 主题切换逻辑
 function toggleTheme() {
     const html = document.documentElement;
     const current = html.getAttribute('data-theme');
@@ -151,7 +146,7 @@ function toggleTheme() {
         themeIcon.className = next === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
     }
 
-    // 如果当前有打开的预览，实时刷新以应用新主题参数
+    // 实时刷新当前已打开的预览页以应用新主题参数
     const activeItem = document.querySelector('.file-item.active');
     if (activeItem) {
         const path = activeItem.getAttribute('data-path');
@@ -169,7 +164,7 @@ function initTheme() {
     }
 }
 
-// 7. 基础交互函数
+// 7. 基础交互逻辑
 function toggleSidebar() {
     const isMobile = window.innerWidth <= 768;
     const sb = document.getElementById('sidebar');
@@ -208,5 +203,5 @@ function changePage(s) {
     }
 }
 
-// 启动
+// 启动程序
 init();
